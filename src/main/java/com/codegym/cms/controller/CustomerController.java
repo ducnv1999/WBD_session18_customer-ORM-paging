@@ -3,11 +3,14 @@ package com.codegym.cms.controller;
 import com.codegym.cms.model.Customer;
 import com.codegym.cms.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.List;
+import java.util.Optional;
+
 
 @Controller
 public class CustomerController {
@@ -16,10 +19,14 @@ public class CustomerController {
     private CustomerService customerService;
 
 
-
     @GetMapping("/customers")
-    public ModelAndView listCustomers(){
-        List<Customer> customers = customerService.findAll();
+    public ModelAndView listCustomers(@RequestParam("s") Optional<String> s, Pageable pageable){
+        Page<Customer> customers;
+        if(s.isPresent()){
+            customers = customerService.findAllByFirstNameContaining(s.get(), pageable);
+        } else {
+            customers = customerService.findAll(pageable);
+        }
         ModelAndView modelAndView = new ModelAndView("/list");
         modelAndView.addObject("customers", customers);
         return modelAndView;
